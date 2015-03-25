@@ -1,5 +1,4 @@
 /*
-
     plugin name: router
     jquery plugin to handle routes with both hash and push state
     why? why another routing plugin? because i couldnt find one that handles both hash and pushstate
@@ -20,7 +19,6 @@
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-
  */
 /* jshint bitwise: true, curly: true, eqeqeq: true, forin: true, freeze: true, latedef: true,
  maxerr: 1000, noarg: true, undef:true, unused: true, browser: true, jquery: true */
@@ -187,8 +185,6 @@
 	function getParameters(url) {
 		var dataList = [];
 
-		// console.log("ROUTES:");
-
 		for (var i = 0, ii = routeList.length; i < ii; i++) {
 			var route = routeList[i];
 
@@ -210,13 +206,10 @@
 					break;
 				}
 			}
-
 			// check for mathing string routes
 			else {
 				var currentUrlParts = url.split("/");
 				var routeParts = route.route.split("/");
-
-				// console.log("matchCounter ", matchCounter, url, route.route)
 
 				// first check so that they have the same amount of elements at least
 				if (routeParts.length === currentUrlParts.length) {
@@ -279,12 +272,5 @@
 		}
 	}
 
-	if (!$.router) {
-		$.router = router;
-	}
-	else {
-		if (window.console && window.console.warn) {
-			console.warn("jQuery.router already defined. Something is using the same name.");
-		}
-	}
+	$.router = router;
 })(jQuery);
