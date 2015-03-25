@@ -49,13 +49,14 @@
 	};
 
 	router.add = function(route, id, callback) {
+		var isRegExp, routeItem, matcherFn;
 		// if we only get a route and a callback, we switch the arguments
 		if (typeof id === "function") {
 			callback = id;
 			id = null;
 		}
 
-		var isRegExp = typeof route === "object";
+		isRegExp = typeof route === "object";
 
 		if (!isRegExp) {
 			// remove the last slash to unifiy all routes
@@ -67,7 +68,7 @@
 			route = route.replace(location.protocol + "//", "").replace(location.hostname, "");
 		}
 
-		var routeItem = {
+		routeItem = {
 			route: route,
 			callback: callback,
 			type: isRegExp ? "regexp" : "string",
@@ -83,6 +84,7 @@
 	};
 
 	function bindStateEvents() {
+		var url;
 		eventAdded = true;
 
 		// default value telling router that we havent replaced the url from a hash. yet.
@@ -92,7 +94,7 @@
 			// if we get a request with a qualified hash (ie it begins with #!)
 			if (location.hash.indexOf("#!/") === 0) {
 				// replace the state
-				var url = location.pathname + location.hash.replace(/^#!\//gi, "");
+				url = location.pathname + location.hash.replace(/^#!\//gi, "");
 				history.replaceState({}, "", url);
 
 				// this flag tells router that the url was converted from hash to popstate
@@ -118,14 +120,14 @@
 	bindStateEvents();
 
 	router.go = function(url, title) {
+		var hash;
 		if (hasPushState) {
 			history.pushState({}, title, url);
 			checkRoutes();
 		}
 		else {
-			// remove part of url that we dont use
-			url = url.replace(location.protocol + "//", "").replace(location.hostname, "");
-			var hash = url.replace(location.pathname, "");
+			// remove part of url that we don't use
+			hash = url.replace(location.protocol + "//", "").replace(location.hostname, "").replace(location.pathname, "");
 
 			if (hash.indexOf("!") < 0) {
 				hash = "!/" + hash;
@@ -141,7 +143,7 @@
 
 	// parse and wash the url to process
 	function parseUrl(url) {
-		var currentUrl = url ? url : location.pathname;
+		var currentUrl = url || location.pathname;
 
 		currentUrl = decodeURI(currentUrl);
 
@@ -163,11 +165,12 @@
 
 	// get the current parameters for either a specified url or the current one if parameters is ommited
 	router.parameters = function(url) {
+		var currentUrl, list;
 		// parse the url so that we handle a unified url
-		var currentUrl = parseUrl(url);
+		currentUrl = parseUrl(url);
 
 		// get the list of actions for the current url
-		var list = getParameters(currentUrl);
+		list = getParameters(currentUrl);
 
 		// if the list is empty, return an empty object
 		if (0 === list.length) {
