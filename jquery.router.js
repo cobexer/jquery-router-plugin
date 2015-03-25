@@ -22,7 +22,8 @@
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 */
- 
+/* jshint bitwise: true, curly: true, eqeqeq: true, forin: true, freeze: true, latedef: true,
+   maxerr: 1000, noarg: true, undef:true, unused: true, browser: true, jquery: true */
 
 (function($){
     
@@ -32,7 +33,6 @@
     var routeList = [];
     var eventAdded = false;
     var currentUsedUrl = location.href; //used for ie to hold the current url
-    var firstRoute = true;
     
     // hold the latest route that was activated
     router.currentId = "";
@@ -55,19 +55,19 @@
     router.add = function(route, id, callback)
     {
         // if we only get a route and a callback, we switch the arguments
-        if (typeof id == "function")
+        if (typeof id === "function")
         {
             callback = id;
             id = null;
         }
         
-        var isRegExp = typeof route == "object";
+        var isRegExp = typeof route === "object";
         
         if (!isRegExp)
         {
             
             // remove the last slash to unifiy all routes
-            if (route.lastIndexOf("/") == route.length - 1)
+            if (route.lastIndexOf("/") === route.length - 1)
             {
                 route = route.substring(0, route.length - 1);
             }
@@ -125,7 +125,7 @@
             setInterval(
                 function()
                 {
-                    if (location.href != currentUsedUrl)
+                    if (location.href !== currentUsedUrl)
                     {
                         handleRoutes();
                         currentUsedUrl = location.href;
@@ -227,7 +227,7 @@
             var route = routeList[i];
             
             // check for mathing reg exp
-            if (route.type == "regexp")
+            if (route.type === "regexp")
             {
                 var result = url.match(route.route);
                 if (result)
@@ -259,10 +259,9 @@
                 //console.log("matchCounter ", matchCounter, url, route.route)
 
                 // first check so that they have the same amount of elements at least
-                if (routeParts.length == currentUrlParts.length)
+                if (routeParts.length === currentUrlParts.length)
                 {
                     var data = {};
-                    var matched = true;
                     var matchCounter = 0;
 
                     for(var j = 0, jj = routeParts.length; j < jj; j++)
@@ -275,7 +274,7 @@
                         }
                         else
                         {
-                            if (routeParts[j] == currentUrlParts[j])
+                            if (routeParts[j] === currentUrlParts[j])
                             {
                                 matchCounter++;
                             }
@@ -283,7 +282,7 @@
                     }
 
                     // break after first hit
-                    if (routeParts.length == matchCounter)
+                    if (routeParts.length === matchCounter)
                     {
                         dataList.push(
                             {

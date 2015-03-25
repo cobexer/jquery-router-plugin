@@ -23,6 +23,11 @@
 
 */
 
+/* jshint bitwise: true, curly: true, eqeqeq: true, forin: true, freeze: true, latedef: true,
+   maxerr: 1000, noarg: true, undef:true, unused: true, browser: true, jquery: true, qunit: true */
+
+/* global jscoverage_report */
+
 QUnit.config.requireExpects = true;
 QUnit.config.testTimeout = 1000;
 
@@ -69,7 +74,7 @@ QUnit.test("regex routing with parameter", function(assert) {
 QUnit.test("route with id", function(assert) {
 	var done = assert.async();
 	assert.expect(3);
-	$.router.add('/v/config', 'configPage', function(data) {
+	$.router.add('/v/config', 'configPage', function() {
 		assert.strictEqual(this.id, 'configPage', 'id of the route available');
 		assert.strictEqual($.router.currentId, 'configPage', 'id of the route available in the $.router.currentId property');
 		var p = $.router.parameters();
@@ -99,7 +104,7 @@ QUnit.test("routing call initiated through history.back", function(assert) {
 QUnit.test("$.router.reset", function(assert) {
 	var done = assert.async(), th, fn, routeCleared = true;
 	assert.expect(1);
-	$.router.add('/v/reset', function(data) {
+	$.router.add('/v/reset', function() {
 		routeCleared = false;
 	});
 	fn = function() {
@@ -114,7 +119,7 @@ QUnit.test("$.router.reset", function(assert) {
 QUnit.test("manual parameter parsing", function(assert) {
 	var done = assert.async();
 	assert.expect(6);
-	$.router.add('/v/parameters/:category/:tag/', function(data) {
+	$.router.add('/v/parameters/:category/:tag/', function() {
 		var p = $.router.parameters();
 		assert.strictEqual($.router.currentParameters, p, "$.router.currentParameters points to the same object");
 		assert.strictEqual(p.category, "television", "manually parsed parameters (first)");
@@ -132,7 +137,7 @@ QUnit.test("manual parameter parsing", function(assert) {
 QUnit.test("routes must match with all parts", function(assert) {
 	var done = assert.async(), fn;
 	assert.expect(1);
-	fn = function(data) {
+	fn = function() {
 		assert.strictEqual(this.id, "categoryAndTag", "category and tag present, thus the route with both must match");
 		done();
 	};
@@ -144,7 +149,7 @@ QUnit.test("routes must match with all parts", function(assert) {
 QUnit.test("routes must match with all parts (registration order should not affect result)", function(assert) {
 	var done = assert.async(), fn;
 	assert.expect(1);
-	fn = function(data) {
+	fn = function() {
 		assert.strictEqual(this.id, "categoryAndTag", "category and tag present, thus the route with both must match");
 		done();
 	};
