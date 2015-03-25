@@ -21,10 +21,10 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-*/
+ */
 
 /* jshint bitwise: true, curly: true, eqeqeq: true, forin: true, freeze: true, latedef: true,
-   maxerr: 1000, noarg: true, undef:true, unused: true, browser: true, jquery: true, qunit: true */
+ maxerr: 1000, noarg: true, undef:true, unused: true, browser: true, jquery: true, qunit: true */
 
 /* global jscoverage_report */
 
