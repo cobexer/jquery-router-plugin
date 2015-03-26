@@ -21,7 +21,7 @@
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 /* jshint bitwise: true, curly: true, eqeqeq: true, forin: true, freeze: true, latedef: true,
- maxerr: 1000, noarg: true, undef:true, unused: true, browser: true, jquery: true */
+ maxerr: 1000, noarg: true, undef:true, unused: true, browser: true, jquery: true, laxcomma: true */
 
 (function($) {
 	var hasPushState = (history && history.pushState);
@@ -205,24 +205,6 @@
 		return currentUrl;
 	}
 
-	// get the current parameters for either a specified url or the current one if parameters is ommited
-	router.parameters = function(url) {
-		var currentUrl, route;
-		// parse the url so that we handle a unified url
-		currentUrl = parseUrl(url);
-
-		route = matchRoute(currentUrl);
-
-		if (route) {
-			router.currentParameters = route.data;
-		}
-		else {
-			router.currentParameters = {};
-		}
-
-		return router.currentParameters;
-	};
-
 	function matchRoute(url) {
 		var match = false;
 		routeList.every(function(route) {
@@ -232,9 +214,6 @@
 					route: route,
 					data: data
 				};
-				// saves the current route id
-				router.currentId = route.id;
-				router.currentParameters = data;
 				// break after first hit
 				return false;
 			}
@@ -244,13 +223,13 @@
 	}
 
 	function checkRoutes() {
-		var route, currentUrl = parseUrl();
+		var currentUrl = parseUrl()
+			, match = matchRoute(currentUrl);
 
-		// check if something is catched
-		route = matchRoute(currentUrl);
-
-		if (route) {
-			route.route.callback(route.data);
+		if (match) {
+			router.currentId = match.route.id;
+			router.currentParameters = match.data;
+			match.route.callback(router.currentParameters);
 		}
 	}
 

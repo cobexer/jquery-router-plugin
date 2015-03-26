@@ -71,12 +71,10 @@ QUnit.test("regex routing with parameter", function(assert) {
 
 QUnit.test("route with id", function(assert) {
 	var done = assert.async();
-	assert.expect(3);
+	assert.expect(2);
 	$.router.add('/v/config', 'configPage', function() {
 		assert.strictEqual(this.id, 'configPage', 'id of the route available');
 		assert.strictEqual($.router.currentId, 'configPage', 'id of the route available in the $.router.currentId property');
-		var p = $.router.parameters();
-		assert.strictEqual($.isEmptyObject(p), true, "manually parsed parameters are empty");
 		done();
 	});
 	$.router.go('/v/config', 'Configuration');
@@ -111,24 +109,6 @@ QUnit.test("$.router.reset", function(assert) {
 	}, 50);
 	$.router.reset();
 	$.router.go('/v/reset', 'reset');
-});
-
-QUnit.test("manual parameter parsing", function(assert) {
-	var done = assert.async();
-	assert.expect(6);
-	$.router.add('/v/parameters/:category/:tag/', function() {
-		var p = $.router.parameters();
-		assert.strictEqual($.router.currentParameters, p, "$.router.currentParameters points to the same object");
-		assert.strictEqual(p.category, "television", "manually parsed parameters (first)");
-		assert.strictEqual(p.tag, "led", "manually parsed parameters (second)");
-		var p2 = $.router.parameters('/v/parameters/printers/laser');
-		assert.strictEqual(p2.category, "printers", "custom url manually parsed parameters (first)");
-		assert.strictEqual(p2.tag, "laser", "custom url manually parsed parameters (second)");
-		var p3 = $.router.parameters('/v/nowhere/42/1337/pi');
-		assert.strictEqual($.isEmptyObject(p3), true, "nonexistent URL has no parameters");
-		done();
-	});
-	$.router.go('/v/parameters/television/led', 'LED TVs');
 });
 
 QUnit.test("routes must match with all parts", function(assert) {
