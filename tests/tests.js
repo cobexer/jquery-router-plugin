@@ -167,3 +167,21 @@ QUnit.test("$.router.check", function(assert) {
 	$.router.check();
 });
 
+QUnit.test("if a $.router.go does not match anything, the current route and parameters must not be modified", function(assert) {
+	var done = assert.async(), route = null;
+	assert.expect(2);
+	$.router.add('/v/currentRoutePersists', 'currentRoutePersists', function(data) {
+		route = {
+			id: this.id,
+			data: data
+		};
+		$.router.go('/v/nowhere');
+	});
+	window.setTimeout(function() {
+		assert.strictEqual(route.id, $.router.currentId, '$.router.reset cleared routes');
+		assert.strictEqual(route.data, $.router.currentParameters, '$.router.reset cleared routes');
+		done();
+	}, 50);
+	$.router.go('/v/currentRoutePersists', 'Current Route Persists if no match');
+});
+

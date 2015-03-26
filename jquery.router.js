@@ -48,8 +48,45 @@
 		router.currentParameters = {};
 	};
 
+	function $_router_check_regex_route(url) {
+		var match = url.match(this.route);
+		if (match) {
+			return {
+				matches: match
+			};
+		}
+		return false;
+	}
+
+	function $_router_check_string_route(url) {
+		var currentUrlParts, routeParts, data = {}, matchCounter = 0, j = 0, jj;
+		currentUrlParts = url.split("/");
+		routeParts = this.route.split("/");
+
+		// first check so that they have the same amount of elements at least
+		if (routeParts.length === currentUrlParts.length) {
+			for (jj = routeParts.length; j < jj; ++j) {
+				if (0 === routeParts[j].indexOf(":")) {
+					data[routeParts[j].substring(1)] = decodeURI(currentUrlParts[j]);
+					matchCounter++;
+				}
+				else {
+					if (routeParts[j] === currentUrlParts[j]) {
+						matchCounter++;
+					}
+				}
+			}
+
+			// break after first hit
+			if (routeParts.length === matchCounter) {
+				return data;
+			}
+		}
+		return false;
+	}
+
 	router.add = function(route, id, callback) {
-		var isRegExp, routeItem, matcherFn;
+		var isRegExp, routeItem, matchFn;
 		// if we only get a route and a callback, we switch the arguments
 		if (typeof id === "function") {
 			callback = id;
@@ -58,7 +95,11 @@
 
 		isRegExp = typeof route === "object";
 
-		if (!isRegExp) {
+		if (isRegExp) {
+			matchFn = $_router_check_regex_route;
+		}
+		else {
+			matchFn = $_router_check_string_route;
 			// remove the last slash to unifiy all routes
 			if (route.lastIndexOf("/") === route.length - 1) {
 				route = route.substring(0, route.length - 1);
@@ -70,6 +111,7 @@
 
 		routeItem = {
 			route: route,
+			match: matchFn,
 			callback: callback,
 			type: isRegExp ? "regexp" : "string",
 			id: id
@@ -138,7 +180,7 @@
 
 	// do a check without affecting the history
 	router.check = router.redo = function() {
-		checkRoutes(true);
+		checkRoutes();
 	};
 
 	// parse and wash the url to process
@@ -165,101 +207,50 @@
 
 	// get the current parameters for either a specified url or the current one if parameters is ommited
 	router.parameters = function(url) {
-		var currentUrl, list;
+		var currentUrl, route;
 		// parse the url so that we handle a unified url
 		currentUrl = parseUrl(url);
 
-		// get the list of actions for the current url
-		list = getParameters(currentUrl);
+		route = matchRoute(currentUrl);
 
-		// if the list is empty, return an empty object
-		if (0 === list.length) {
-			router.currentParameters = {};
+		if (route) {
+			router.currentParameters = route.data;
 		}
-
-		// if we got results, return the first one. at least for now
 		else {
-			router.currentParameters = list[0].data;
+			router.currentParameters = {};
 		}
 
 		return router.currentParameters;
 	};
 
-	function getParameters(url) {
-		var dataList = [];
-
-		for (var i = 0, ii = routeList.length; i < ii; i++) {
-			var route = routeList[i];
-
-			// check for mathing reg exp
-			if (route.type === "regexp") {
-				var result = url.match(route.route);
-				if (result) {
-					dataList.push({
-						route: route,
-						data: {
-							matches: result
-						}
-					});
-
-					// saves the current route id
-					router.currentId = route.id;
-
-					// break after first hit
-					break;
-				}
+	function matchRoute(url) {
+		var match = false;
+		routeList.every(function(route) {
+			var data = route.match(url);
+			if (data) {
+				match = {
+					route: route,
+					data: data
+				};
+				// saves the current route id
+				router.currentId = route.id;
+				router.currentParameters = data;
+				// break after first hit
+				return false;
 			}
-			// check for mathing string routes
-			else {
-				var currentUrlParts = url.split("/");
-				var routeParts = route.route.split("/");
-
-				// first check so that they have the same amount of elements at least
-				if (routeParts.length === currentUrlParts.length) {
-					var data = {};
-					var matchCounter = 0;
-
-					for (var j = 0, jj = routeParts.length; j < jj; j++) {
-						var isParam = routeParts[j].indexOf(":") === 0;
-						if (isParam) {
-							data[routeParts[j].substring(1)] = decodeURI(currentUrlParts[j]);
-							matchCounter++;
-						}
-						else {
-							if (routeParts[j] === currentUrlParts[j]) {
-								matchCounter++;
-							}
-						}
-					}
-
-					// break after first hit
-					if (routeParts.length === matchCounter) {
-						dataList.push({
-							route: route,
-							data: data
-						});
-
-						// saved the current route id
-						router.currentId = route.id;
-						router.currentParameters = data;
-
-						break;
-					}
-				}
-			}
-		}
-		return dataList;
+			return true;
+		});
+		return match;
 	}
 
 	function checkRoutes() {
-		var currentUrl = parseUrl(location.pathname);
+		var route, currentUrl = parseUrl();
 
 		// check if something is catched
-		var actionList = getParameters(currentUrl);
+		route = matchRoute(currentUrl);
 
-		// ietrate trough result (but it will only kick in one)
-		for (var i = 0, ii = actionList.length; i < ii; i++) {
-			actionList[i].route.callback(actionList[i].data);
+		if (route) {
+			route.route.callback(route.data);
 		}
 	}
 
