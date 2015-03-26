@@ -100,16 +100,15 @@ QUnit.test("routing call initiated through history.back", function(assert) {
 });
 
 QUnit.test("$.router.reset", function(assert) {
-	var done = assert.async(), th, fn, routeCleared = true;
+	var done = assert.async(), routeCleared = true;
 	assert.expect(1);
 	$.router.add('/v/reset', function() {
 		routeCleared = false;
 	});
-	fn = function() {
+	window.setTimeout(function() {
 		assert.strictEqual(routeCleared, true, '$.router.reset cleared routes');
 		done();
-	};
-	th = window.setTimeout(fn, 50);
+	}, 50);
 	$.router.reset();
 	$.router.go('/v/reset', 'reset');
 });
@@ -144,7 +143,7 @@ QUnit.test("routes must match with all parts", function(assert) {
 	$.router.go('/v/parts/phones/android', 'equal length route should match');
 });
 
-QUnit.test("routes must match with all parts (registration order should not affect result)", function(assert) {
+QUnit.test("routes must match with all parts (registration order must not affect result)", function(assert) {
 	var done = assert.async(), fn;
 	assert.expect(1);
 	fn = function() {
