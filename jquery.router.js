@@ -48,75 +48,79 @@
 		router.currentParameters = {};
 	};
 
-	function $_router_check_regex_route(url) {
-		var match = url.match(this.route);
+	function RegexRoute(route) {
+		this.regex = route;
+	}
+
+	RegexRoute.prototype.match = function(url) {
+		var match = url.match(this.regex);
 		if (match) {
 			return {
 				matches: match
 			};
 		}
 		return false;
+	};
+
+	function StringRoute(route) {
+		var spec = route;
+		// remove the last slash to unify all routes
+		if ('/' === spec.charAt(spec.length - 1)) {
+			spec = spec.substring(0, spec.length - 1);
+		}
+
+		// if the routes where created with an absolute url, we have to remove the absolute part anyway, since we can't change that much
+		spec = spec.replace(location.protocol + "//", "").replace(location.hostname, "");
+		this.parts = spec.split('/').map(function(value) {
+			if (':' === value.charAt(0)) {
+				return {
+					parameter: true,
+					str: value.substring(1)
+				};
+			}
+			return {
+				parameter: false,
+				str: value
+			};
+		});
 	}
 
-	function $_router_check_string_route(url) {
-		var currentUrlParts, routeParts, data = {}, matchCounter = 0, j = 0, jj;
+	StringRoute.prototype.match = function(url) {
+		var currentUrlParts, matches = false, data = {};
 		currentUrlParts = url.split("/");
-		routeParts = this.route.split("/");
 
 		// first check so that they have the same amount of elements at least
-		if (routeParts.length === currentUrlParts.length) {
-			for (jj = routeParts.length; j < jj; ++j) {
-				if (0 === routeParts[j].indexOf(":")) {
-					data[routeParts[j].substring(1)] = decodeURI(currentUrlParts[j]);
-					matchCounter++;
+		if (this.parts.length === currentUrlParts.length) {
+			matches = this.parts.every(function(part, i) {
+				if (part.parameter) {
+					data[part.str] = decodeURI(currentUrlParts[i]);
 				}
-				else {
-					if (routeParts[j] === currentUrlParts[j]) {
-						matchCounter++;
-					}
+				else if (currentUrlParts[i] !== part.str) {
+					return false;
 				}
-			}
-
-			// break after first hit
-			if (routeParts.length === matchCounter) {
-				return data;
-			}
+				return true;
+			});
 		}
-		return false;
-	}
+		return matches ? data : false;
+	};
 
 	router.add = function(route, id, callback) {
-		var isRegExp, routeItem, matchFn;
+		var routeItem;
 		// if we only get a route and a callback, we switch the arguments
 		if (typeof id === "function") {
 			callback = id;
 			id = null;
 		}
 
-		isRegExp = typeof route === "object";
-
-		if (isRegExp) {
-			matchFn = $_router_check_regex_route;
+		if (typeof route === "object") {
+			routeItem = new RegexRoute(route);
 		}
 		else {
-			matchFn = $_router_check_string_route;
-			// remove the last slash to unifiy all routes
-			if (route.lastIndexOf("/") === route.length - 1) {
-				route = route.substring(0, route.length - 1);
-			}
-
-			// if the routes where created with an absolute url ,we have to remove the absolut part anyway, since we cant change that much
-			route = route.replace(location.protocol + "//", "").replace(location.hostname, "");
+			routeItem = new StringRoute(route);
 		}
 
-		routeItem = {
-			route: route,
-			match: matchFn,
-			callback: callback,
-			type: isRegExp ? "regexp" : "string",
-			id: id
-		};
-
+		routeItem.id = id;
+		routeItem.callback = callback;
 		routeList.push(routeItem);
 
 		// we add the event listener after the first route is added so that we dont need to listen to events in vain
