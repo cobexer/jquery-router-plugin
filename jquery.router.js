@@ -24,22 +24,13 @@
  maxerr: 1000, noarg: true, undef:true, unused: true, browser: true, jquery: true, laxcomma: true */
 
 (function($) {
-	var hasPushState = (history && history.pushState);
-	var hasHashState = !hasPushState && ("onhashchange" in window) && false;
 	var router = {};
 	var routeList = [];
-	var eventAdded = false;
-	var currentUsedUrl = location.href; // used for ie to hold the current url
+	var currentUsedUrl; // used to hold the current url for legacy browsers
 
 	// hold the latest route that was activated
 	router.currentId = "";
 	router.currentParameters = {};
-
-	router.capabilities = {
-		hash: hasHashState,
-		pushState: hasPushState,
-		timer: !hasHashState && !hasPushState
-	};
 
 	// reset all routes
 	router.reset = function() {
@@ -122,90 +113,29 @@
 		routeItem.id = id;
 		routeItem.callback = callback;
 		routeList.push(routeItem);
-
-		// we add the event listener after the first route is added so that we dont need to listen to events in vain
-		if (!eventAdded) {
-			bindStateEvents();
-		}
 	};
 
-	function bindStateEvents() {
-		var url;
-		eventAdded = true;
-
-		// default value telling router that we havent replaced the url from a hash. yet.
-		router.fromHash = false;
-
-		if (hasPushState) {
-			// if we get a request with a qualified hash (ie it begins with #!)
-			if (location.hash.indexOf("#!/") === 0) {
-				// replace the state
-				url = location.pathname + location.hash.replace(/^#!\//gi, "");
-				history.replaceState({}, "", url);
-
-				// this flag tells router that the url was converted from hash to popstate
-				router.fromHash = true;
-			}
-
-			$(window).bind("popstate", handleRoutes);
-		}
-		else if (hasHashState) {
-			$(window).bind("hashchange.router", handleRoutes);
-		}
-		else {
-			// if no events are available we use a timer to check periodically for changes in the url
-			setInterval(function() {
-				if (location.href !== currentUsedUrl) {
-					handleRoutes();
-					currentUsedUrl = location.href;
-				}
-			}, 500);
-		}
-	}
-
-	bindStateEvents();
-
 	router.go = function(url, title) {
-		var hash;
-		if (hasPushState) {
+		if (history.pushState) {
 			history.pushState({}, title, url);
-			checkRoutes();
 		}
-		else {
-			// remove part of url that we don't use
-			hash = url.replace(location.protocol + "//", "").replace(location.hostname, "").replace(location.pathname, "");
-
-			if (hash.indexOf("!") < 0) {
-				hash = "!/" + hash;
-			}
-			location.hash = hash;
-		}
+		checkRoutes(url);
 	};
 
 	// do a check without affecting the history
 	router.check = router.redo = function() {
-		checkRoutes();
+		// if the history api is available use the real current url; else use the remembered last used url
+		var url = history.pushState ? location.pathname : currentUsedUrl;
+		checkRoutes(url);
 	};
 
 	// parse and wash the url to process
 	function parseUrl(url) {
-		var currentUrl = url || location.pathname;
-
-		currentUrl = decodeURI(currentUrl);
-
-		// if no pushstate is availabe we have to use the hash
-		if (!hasPushState) {
-			if (location.hash.indexOf("#!/") === 0) {
-				currentUrl += location.hash.substring(3);
-			}
-			else {
-				return '';
-			}
+		var currentUrl = decodeURI(url);
+		// if the last character is a slash, we just remove it
+		if ('/' === currentUrl.charAt(currentUrl.length - 1)) {
+			currentUrl = currentUrl.substring(0, currentUrl.length - 1);
 		}
-
-		// and if the last character is a slash, we just remove it
-		currentUrl = currentUrl.replace(/\/$/, "");
-
 		return currentUrl;
 	}
 
@@ -226,11 +156,12 @@
 		return match;
 	}
 
-	function checkRoutes() {
-		var currentUrl = parseUrl()
+	function checkRoutes(url) {
+		var currentUrl = parseUrl(url)
 			, match = matchRoute(currentUrl);
 
 		if (match) {
+			currentUsedUrl = url;
 			router.currentId = match.route.id;
 			router.currentParameters = match.data;
 			match.route.callback(router.currentParameters);
@@ -239,15 +170,10 @@
 
 	function handleRoutes(e) {
 		if (e && e.originalEvent && e.originalEvent.state !== undefined) {
-			checkRoutes();
-		}
-		else if (hasHashState) {
-			checkRoutes();
-		}
-		else if (!hasHashState && !hasPushState) {
-			checkRoutes();
+			checkRoutes(location.pathname);
 		}
 	}
 
+	$(window).bind("popstate", handleRoutes);
 	$.router = router;
 })(jQuery);

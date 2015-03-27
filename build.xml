@@ -13,6 +13,9 @@
 		<exec executable="${runner}">
 			<arg value="http://localhost:8081/index.html" />
 		</exec>
+		<exec executable="${runner}">
+			<arg value="http://localhost:8081/index.html?disableHistoryAPI" />
+		</exec>
 		<antcall target="JSCover-stop" />
 	</target>
 

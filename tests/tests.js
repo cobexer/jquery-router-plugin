@@ -29,6 +29,10 @@
 QUnit.config.requireExpects = true;
 QUnit.config.testTimeout = 1000;
 
+if (/disableHistoryAPI/.test(location.search)) {
+	history.pushState = undefined;
+}
+
 $(window).on('unload', function() {
 	if (window.jscoverage_report) {
 		jscoverage_report();
@@ -80,7 +84,7 @@ QUnit.test("route with id", function(assert) {
 	$.router.go('/v/config', 'Configuration');
 });
 
-QUnit.test("routing call initiated through history.back", function(assert) {
+QUnit[history.pushState ? 'test' : 'skip']("routing call initiated through history.back", function(assert) {
 	var index = 0, done = [assert.async(), assert.async(), assert.async()];
 	assert.expect(3);
 	$.router.add('/v/history/:id', function(data) {
@@ -135,7 +139,7 @@ QUnit.test("routes must match with all parts (registration order must not affect
 	$.router.go('/v/parts2/phones/android', 'equal length route should match');
 });
 
-QUnit.test("$.router.check", function(assert) {
+QUnit[history.pushState ? 'test' : 'skip']("$.router.check", function(assert) {
 	var done = assert.async();
 	assert.expect(1);
 	$.router.add('/v/checked', function() {
@@ -144,6 +148,19 @@ QUnit.test("$.router.check", function(assert) {
 	});
 	history.pushState({}, 'Checked URL', '/v/checked');
 	$.router.check();
+});
+
+QUnit[history.pushState ? 'skip' : 'test']("$.router.check (legacy browsers without history.pushState)", function(assert) {
+	var done = [assert.async(), assert.async()], idx = 0;
+	assert.expect(2);
+	$.router.add('/v/checked', function() {
+		assert.ok(true, "route for checked url invoked");
+		done[idx++]();
+		setTimeout(function() {
+			$.router.check();
+		}, 50);
+	});
+	$.router.go('/v/checked', 'Checked URL');
 });
 
 QUnit.test("if a $.router.go does not match anything, the current route and parameters must not be modified", function(assert) {
