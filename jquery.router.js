@@ -1,11 +1,6 @@
 /*
-    plugin name: router
-    jquery plugin to handle routes with both hash and push state
-    why? why another routing plugin? because i couldnt find one that handles both hash and pushstate
-    created by 24hr // camilo.tapia
-    author twitter: camilo.tapia
-  
     Copyright 2011  camilo tapia // 24hr (email : camilo.tapia@gmail.com)
+    Copyright 2015 Christoph Obexer <cobexer@gmail.com>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License, version 2, as 

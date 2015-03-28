@@ -1,7 +1,5 @@
 # jquery router plugin
-This plugin handles routes for both hash and push state.
-
-Why? Why another routing plugin? Because i couldn't find one that handles both hash and pushstate.
+This plugin handles routes for push state with a simple api and deterministic route ordering.
 
 ### How to add routes
 
@@ -12,7 +10,7 @@ $.router.add(*route*, *[id]*, *callback*);
 Example:
 
 	// Adds a route for /items/:item and calls the callback when matched
-	$.router.add(/items/:item", function(data) {
+	$.router.add("/items/:item", function(data) {
 		console.log(data.item);
 	});
 
@@ -20,7 +18,7 @@ or
 
 	// Adds a route for /items/:item and calls the callback when matched, but also has
 	// a reference to the routes id in $.router.currentId
-	$.router.add(/items/:item", "foo", function(data) {
+	$.router.add("/items/:item", "foo", function(data) {
 		console.log(data.item);
 	});
 
@@ -30,13 +28,27 @@ You can also change the current url to a route, and thereby triggering the route
 $.router.go(url, title);
 
 Example:
-	
-	// This will change the url to http://www.foo.com/items/mycoolitem and set the title to
-	// "My cool item" without reloading the page. If using hashes instead, it will use the url
-	// http://www.foo.com/#!items/mycoolitem.
+
+	// This will change the url to http://www.foo.com/items/42 and set the title to
+	// "My cool item" without reloading the page.
 	// If a route has been set that matches it, it will be triggered.
-	$.router.go("/items/mycoolitem", "My cool item");
-	
+	$.router.go("/items/42", "My cool item");
+
+Routes are examined from most the specific route to least specific route:
+
+	Consider the following routes as added (in any order):
+	/\/items\/(\d+)/: a regular expression route
+	"/items/:item": a simple route with a parameter
+	"/items/all": a simple route without any parameter
+	The order in which the routes will be checked is:
+	/items/all		checked first because it has 2 static parts
+	/items/:item	checked second because it has 1 static part
+	/\/items\/(\d+)/
+
+Please note that the ordering between regular expression based routes is undefined.
+
+__For more usage examples check the included tests inside the tests directory.__
+
 ### Reseting all routes
 
 If you need to remove all routes (which is good when testing) you just call:
@@ -48,6 +60,7 @@ $.router.reset();
 (The MIT License)
 
 Copyright (c) 2011 Camilo Tapia &lt;camilo.tapia@gmail.com&gt;
+Copyright (c) 2015 Christoph Obexer &lt;cobexer@gmail.com&gt;
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
