@@ -24,9 +24,7 @@
  maxerr: 1000, noarg: true, undef:true, unused: true, browser: true, jquery: true, laxcomma: true */
 
 (function($) {
-	var router = {};
-	var routeList = [];
-	var currentUsedUrl; // used to hold the current url for legacy browsers
+	var router = {}, routeList = [], routesOptimized = true, currentUsedUrl;
 
 	// hold the latest route that was activated
 	router.currentId = "";
@@ -35,16 +33,17 @@
 	// reset all routes
 	router.reset = function() {
 		routeList = [];
+		routesOptimized = true;
 		router.currentId = "";
 		router.currentParameters = {};
 	};
 
 	function RegexRoute(route) {
-		this.regex = route;
+		this._regex = route;
 	}
 
 	RegexRoute.prototype.match = function(url) {
-		var match = url.match(this.regex);
+		var match = url.match(this._regex);
 		if (match) {
 			return {
 				matches: match
@@ -53,8 +52,12 @@
 		return false;
 	};
 
+	RegexRoute.prototype.weight = function() {
+		return -1;
+	};
+
 	function StringRoute(route) {
-		var spec = route;
+		var spec = route, weight = 0;
 		// remove the last slash to unify all routes
 		if ('/' === spec.charAt(spec.length - 1)) {
 			spec = spec.substring(0, spec.length - 1);
@@ -62,18 +65,18 @@
 
 		// if the routes where created with an absolute url, we have to remove the absolute part anyway, since we can't change that much
 		spec = spec.replace(location.protocol + "//", "").replace(location.hostname, "");
-		this.parts = spec.split('/').map(function(value) {
+		this._parts = spec.split('/').map(function(value) {
+			var result = { parameter: false, str: value };
 			if (':' === value.charAt(0)) {
-				return {
-					parameter: true,
-					str: value.substring(1)
-				};
+				result.parameter = true;
+				result.str = value.substring(1);
 			}
-			return {
-				parameter: false,
-				str: value
-			};
+			else {
+				++weight;
+			}
+			return result;
 		});
+		this._weight = weight;
 	}
 
 	StringRoute.prototype.match = function(url) {
@@ -81,8 +84,8 @@
 		currentUrlParts = url.split("/");
 
 		// first check so that they have the same amount of elements at least
-		if (this.parts.length === currentUrlParts.length) {
-			matches = this.parts.every(function(part, i) {
+		if (this._parts.length === currentUrlParts.length) {
+			matches = this._parts.every(function(part, i) {
 				if (part.parameter) {
 					data[part.str] = decodeURI(currentUrlParts[i]);
 				}
@@ -95,8 +98,13 @@
 		return matches ? data : false;
 	};
 
+	StringRoute.prototype.weight = function() {
+		return this._weight;
+	};
+
 	router.add = function(route, id, callback) {
 		var routeItem;
+		routesOptimized = false;
 		// if we only get a route and a callback, we switch the arguments
 		if (typeof id === "function") {
 			callback = id;
@@ -156,9 +164,27 @@
 		return match;
 	}
 
+	function optimizeRoutes() {
+		routeList.sort(function(a, b) {
+			var wa = a.weight(), wb = b.weight();
+			if (wa === wb) {
+				return 0;
+			}
+			if (wa > wb) {
+				return -1;
+			}
+			return 1;
+		});
+		routesOptimized = true;
+	}
+
 	function checkRoutes(url) {
-		var currentUrl = parseUrl(url)
-			, match = matchRoute(currentUrl);
+		var currentUrl, match;
+		if (!routesOptimized) {
+			optimizeRoutes();
+		}
+		currentUrl = parseUrl(url);
+		match = matchRoute(currentUrl);
 
 		if (match) {
 			currentUsedUrl = url;

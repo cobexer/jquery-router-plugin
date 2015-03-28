@@ -195,3 +195,17 @@ QUnit[hasHistoryAPI ? 'test' : 'skip']("location.search should be left intact", 
 	history.replaceState({}, '', location.pathname + "?rule34");
 	$.router.go('/v/location/search/kept', 'Check location.search must be left intact');
 });
+
+QUnit.test("most specific route wins", function(assert) {
+	var done = assert.async();
+	assert.expect(1);
+	$.router.add('/v/specifity/:tag', function() {
+		assert.ok(false, "parameterized route should loose");
+		done();
+	});
+	$.router.add('/v/specifity/all', function() {
+		assert.ok(true);
+		done();
+	});
+	$.router.go('/v/specifity/all', 'static route should win over parametered route');
+});
