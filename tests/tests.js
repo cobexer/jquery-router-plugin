@@ -60,11 +60,11 @@ QUnit.test("simple routing with parameter", function(assert) {
 QUnit.test("regex routing with parameter", function(assert) {
 	var done = assert.async();
 	assert.expect(4);
-	$.router.add(/\/v\/show\/(\d{4})\/([abc])_(\d)/, function(data) {
-		assert.strictEqual(data.matches.length, 4, "regex argument result passed");
-		assert.strictEqual(data.matches[1], "1337", "first capture");
-		assert.strictEqual(data.matches[2], "b", "second capture");
-		assert.strictEqual(data.matches[3], "9", "third capture");
+	$.router.add(/^\/v\/show\/(\d{4})\/([abc])_(\d)$/, function(matches) {
+		assert.strictEqual(matches.length, 4, "regex argument result passed");
+		assert.strictEqual(matches[1], "1337", "first capture");
+		assert.strictEqual(matches[2], "b", "second capture");
+		assert.strictEqual(matches[3], "9", "third capture");
 		done();
 	});
 	$.router.go('/v/show/1337/b_9', 'Regexp URL test');

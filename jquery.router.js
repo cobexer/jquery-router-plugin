@@ -40,9 +40,7 @@
 	RegexRoute.prototype.match = function(url) {
 		var match = url.match(this._regex);
 		if (match) {
-			return {
-				matches: match
-			};
+			return match;
 		}
 		return false;
 	};
