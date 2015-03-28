@@ -117,7 +117,7 @@
 
 	router.go = function(url, title) {
 		if (history.pushState) {
-			history.pushState({}, title, url);
+			history.pushState({}, title, url + location.search);
 		}
 		checkRoutes(url);
 	};
