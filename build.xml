@@ -42,6 +42,16 @@
 		<get src="http://localhost:8081/stop" dest="${jscover.dir}/stop.txt" />
 	</target>
 
+	<target name="JSCover-report">
+		<!-- java -cp JSCover-all.jar jscover.report.Main - -format=COBERTURAXML REPORT-DIR SRC-DIRECTORY -->
+		<java classname="jscover.report.Main">
+			<classpath location="${jscover}" />
+			<arg value="--format=COBERTURAXML" />
+			<arg value="${jscover.dir}" />
+			<arg value="." />
+		</java>
+	</target>
+
 	<target name="detect">
 		<available file="${runner}" property="phantomjs.runner.installed" />
 		<available file="${jscover}" property="jscover.installed" />
