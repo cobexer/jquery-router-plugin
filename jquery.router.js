@@ -19,7 +19,12 @@
  maxerr: 1000, noarg: true, undef:true, unused: true, browser: true, jquery: true, laxcomma: true */
 
 (function($) {
-	var router = {}, routeList = [], routesOptimized = true, currentUsedUrl;
+	var router, routeList, routesOptimized, currentUsedUrl, $router;
+
+	router = {};
+	routeList = [];
+	routesOptimized = true;
+	$router = $(router);
 
 	// hold the latest route that was activated
 	router.currentId = "";
@@ -193,6 +198,9 @@
 			router.currentParameters = match.data;
 			match.route.callback(router.currentParameters);
 		}
+		else {
+			$router.triggerHandler('route404', [ url ]);
+		}
 	}
 
 	function handleRoutes(e) {
@@ -200,6 +208,14 @@
 			checkRoutes(location.pathname);
 		}
 	}
+
+	router.on = function() {
+		return $router.on.apply($router, arguments);
+	};
+
+	router.off = function() {
+		return $router.off.apply($router, arguments);
+	};
 
 	$(window).bind("popstate", handleRoutes);
 	$.router = router;

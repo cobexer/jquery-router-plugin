@@ -59,6 +59,18 @@ If you need to remove all routes (which is good when testing) you just call:
 
 $.router.reset();
 
+### Events
+
+In case a route attempt leads to no match the ___route404___ event gets triggered with the url as argument:
+to ease event handling $.router.on and $.router.off are aliases to jQuerys on and off functions.
+
+	// register an event handler to respond to route misses.
+	$.router.on('route404', function(e, url) {
+		console.log('No route for ' + url);
+	});
+	// unregister all event handlers again.
+	$.router.on('route404');
+
 ## License 
 
 (The MIT License)

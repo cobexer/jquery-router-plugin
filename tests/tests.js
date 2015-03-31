@@ -91,15 +91,13 @@ QUnit[hasHistoryAPI ? 'test' : 'skip']("routing call initiated through history.b
 });
 
 QUnit.test("$.router.reset", function(assert) {
-	var done = assert.async(), routeCleared = true;
-	assert.expect(1);
-	$.router.add('/v/reset', function() {
-		routeCleared = false;
+	assert.expect(2);
+	$.router.add('/v/reset', $.noop);
+	$.router.on('route404', function(e, url) {
+		$.router.off('route404');
+		assert.strictEqual(e.type, 'route404', 'expected event type');
+		assert.strictEqual(url, '/v/reset', 'route404 triggered with the expected url');
 	});
-	window.setTimeout(function() {
-		assert.strictEqual(routeCleared, true, '$.router.reset cleared routes');
-		done();
-	}, 50);
 	$.router.reset();
 	$.router.go('/v/reset', 'reset');
 });
@@ -149,7 +147,7 @@ QUnit[hasHistoryAPI ? 'skip' : 'test']("$.router.check (legacy browsers without 
 });
 
 QUnit.test("if a $.router.go does not match anything, the current route and parameters must not be modified", function(assert) {
-	var done = assert.async(), route = null;
+	var route = null;
 	assert.expect(2);
 	$.router.add('/v/currentRoutePersists', 'currentRoutePersists', function(data) {
 		route = {
@@ -158,11 +156,11 @@ QUnit.test("if a $.router.go does not match anything, the current route and para
 		};
 		$.router.go('/v/nowhere');
 	});
-	window.setTimeout(function() {
+	$.router.on('route404', function() {
+		$.router.off('route404');
 		assert.strictEqual(route.id, $.router.currentId, '$.router.reset cleared routes');
 		assert.strictEqual(route.data, $.router.currentParameters, '$.router.reset cleared routes');
-		done();
-	}, 50);
+	});
 	$.router.go('/v/currentRoutePersists', 'Current Route Persists if no match');
 });
 
