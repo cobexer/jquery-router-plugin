@@ -179,12 +179,24 @@ QUnit[hasHistoryAPI ? 'test' : 'skip']("location.search should be left intact", 
 });
 
 QUnit.test("most specific route wins", function(assert) {
-	assert.expect(1);
-	$.router.add('/v/specifity/:tag', function() {
-		assert.ok(false, "parameterized route should loose");
-	});
-	$.router.add('/v/specifity/all', function() {
-		assert.ok(true);
-	});
-	$.router.go('/v/specifity/all', 'static route should win over parametered route');
+	var expect, fn;
+	assert.expect(5);
+	fn = function() {
+		assert.strictEqual(this.id, expect, "checking " + expect + " on: " + location.pathname);
+	};
+	$.router.add(/^\/v\/specifity\/(.*)$/, 'regex', fn);
+	$.router.add('/v/:specifity/:tag', 'static:parameter:parameter', fn);
+	$.router.add('/v/:specifity/all', 'static:parameter:static', fn);
+	$.router.add('/v/specifity/:tag', 'static:static:parameter', fn);
+	$.router.add('/v/specifity/all', 'static:static:static', fn);
+	expect = 'static:static:static';
+	$.router.go('/v/specifity/all', 'static:static:static');
+	expect = 'static:parameter:static';
+	$.router.go('/v/specifity2/all', 'static:parameter:static');
+	expect = 'static:static:parameter';
+	$.router.go('/v/specifity/any', 'static:static:parameter');
+	expect = 'static:parameter:parameter';
+	$.router.go('/v/specifity2/any', 'static:parameter:parameter');
+	expect = 'regex';
+	$.router.go('/v/specifity/any/whatever', 'regex');
 });

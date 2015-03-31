@@ -38,12 +38,16 @@ Routes are examined from most the specific route to least specific route:
 
 	Consider the following routes as added (in any order):
 	/\/items\/(\d+)/: a regular expression route
+	"/:p1/:p2" a route with 2 parameter
+	"/:type/edit" a route with a parameter as first argument
 	"/items/:item": a simple route with a parameter
 	"/items/all": a simple route without any parameter
 	The order in which the routes will be checked is:
-	/items/all		checked first because it has 2 static parts
-	/items/:item	checked second because it has 1 static part
-	/\/items\/(\d+)/
+	/items/all			checked first because it has 2 static parts
+	/items/:item		checked second because it has 1 static part
+	/:type/edit			checked after the route above because of the position of the parameter
+	/:p1/:p2			checked because it has 2 parameters (more than those above)
+	/\/items\/(\d+)/	regular expression routes are checked last
 
 Please note that the ordering between regular expression based routes is undefined.
 

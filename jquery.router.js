@@ -46,11 +46,11 @@
 	};
 
 	RegexRoute.prototype.weight = function() {
-		return -1;
+		return [];
 	};
 
 	function StringRoute(route) {
-		var spec = route, weight = 0;
+		var spec = route, weight = [];
 		// remove the last slash to unify all routes
 		if ('/' === spec.charAt(spec.length - 1)) {
 			spec = spec.substring(0, spec.length - 1);
@@ -63,9 +63,10 @@
 			if (':' === value.charAt(0)) {
 				result.parameter = true;
 				result.str = value.substring(1);
+				weight.push(0);
 			}
 			else {
-				++weight;
+				weight.push(1);
 			}
 			return result;
 		});
@@ -159,14 +160,21 @@
 
 	function optimizeRoutes() {
 		routeList.sort(function(a, b) {
-			var wa = a.weight(), wb = b.weight();
-			if (wa === wb) {
-				return 0;
+			var i, l, wa, wb, ia, ib;
+			wa = a.weight();
+			wb = b.weight();
+			l = Math.max(wa.length, wb.length);
+			for (i = 0; i < l; ++i) {
+				ia = wa.length > i ? wa[i] : -1;
+				ib = wb.length > i ? wb[i] : -1;
+				if (ia > ib) {
+					return -1;
+				}
+				else if (ia < ib) {
+					return 1;
+				}
 			}
-			if (wa > wb) {
-				return -1;
-			}
-			return 1;
+			return 0;
 		});
 		routesOptimized = true;
 	}
