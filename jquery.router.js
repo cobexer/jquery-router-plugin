@@ -245,6 +245,7 @@
 		if (argIdx > -1) {
 			args.splice(argIdx, 1);
 			history.replaceState({}, document.title, root + '/' + url + (args.length ? ('?' + args.join('&')) : ''));
+			router.check();
 		}
 	};
 
