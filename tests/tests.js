@@ -201,3 +201,20 @@ QUnit.test("most specific route wins", function(assert) {
 	expect = 'regex';
 	$.router.go('/v/specifity/any/whatever', 'regex');
 });
+
+QUnit.test("$.router.chroot", function(assert) {
+	$.router.reset();
+	$.router.go('/');
+	var root = location.pathname;
+	assert.expect(1);
+	$.router.add('/chroot', function() {
+		if (hasHistoryAPI) {
+			assert.strictEqual(location.pathname, root + '/v/newroot/chroot', 'root considered when matching routes and updathing the browser visible URL');
+		}
+		else {
+			assert.ok(true, 'route triggered, but no URL updates supported without the history API');
+		}
+	});
+	$.router.chroot(root + '/v/newroot/');
+	$.router.go('/chroot', 'chroot(2)');
+});
