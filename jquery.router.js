@@ -60,11 +60,7 @@
 	}
 
 	RegexRoute.prototype.match = function(url) {
-		var match = url.match(this._regex);
-		if (match) {
-			return match;
-		}
-		return false;
+		return url.match(this._regex);
 	};
 
 	RegexRoute.prototype.weight = function() {
