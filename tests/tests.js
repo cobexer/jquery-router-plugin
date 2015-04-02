@@ -36,6 +36,8 @@ $(window).on('unload', function() {
 	}
 });
 
+$.router.init('v');
+
 QUnit.test("simple routing", function(assert) {
 	assert.expect(1);
 	$.router.add('/', function() {
@@ -129,7 +131,8 @@ QUnit[hasHistoryAPI ? 'test' : 'skip']("$.router.check", function(assert) {
 	$.router.add('/v/checked', function() {
 		assert.ok(true, "route for checked url invoked");
 	});
-	history.pushState({}, 'Checked URL', '/v/checked' + location.search);
+	var url = location.pathname.replace(/\/v\/.*$/, '/v/checked') + location.search;
+	history.pushState({}, 'Checked URL', url);
 	$.router.check();
 });
 

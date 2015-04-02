@@ -19,7 +19,7 @@
  maxerr: 1000, noarg: true, undef:true, unused: true, browser: true, jquery: true, laxcomma: true */
 
 (function($) {
-	var router, routeList, routesOptimized, currentUsedUrl, $router;
+	var router, routeList, routesOptimized, currentUsedUrl, $router, root;
 
 	router = {};
 	routeList = [];
@@ -29,6 +29,23 @@
 	// hold the latest route that was activated
 	router.currentId = "";
 	router.currentParameters = {};
+
+	function stripSlash(url) {
+		if ('/' === url.charAt(url.length - 1)) {
+			return url.substring(0, url.length - 1);
+		}
+		return url;
+	}
+
+	function stripRoot(url) {
+		var result = root ? false : url;
+		if (root && 0 === url.indexOf(root)) {
+			result = url.substring(root.length);
+		}
+		return result;
+	}
+
+	root = stripSlash(location.pathname);
 
 	// reset all routes
 	router.reset = function() {
@@ -55,12 +72,7 @@
 	};
 
 	function StringRoute(route) {
-		var spec = route, weight = [];
-		// remove the last slash to unify all routes
-		if ('/' === spec.charAt(spec.length - 1)) {
-			spec = spec.substring(0, spec.length - 1);
-		}
-
+		var spec = stripSlash(route), weight = [];
 		// if the routes where created with an absolute url, we have to remove the absolute part anyway, since we can't change that much
 		spec = spec.replace(location.protocol + "//", "").replace(location.hostname, "");
 		this._parts = spec.split('/').map(function(value) {
@@ -101,6 +113,10 @@
 		return this._weight;
 	};
 
+	router.chroot = function(newRoot) {
+		root = stripSlash(newRoot);
+	};
+
 	router.add = function(route, id, callback) {
 		var routeItem;
 		routesOptimized = false;
@@ -124,7 +140,7 @@
 
 	router.go = function(url, title) {
 		if (history.pushState) {
-			history.pushState({}, title, url + location.search);
+			history.pushState({}, title, root + url + location.search);
 		}
 		checkRoutes(url);
 	};
@@ -132,18 +148,13 @@
 	// do a check without affecting the history
 	router.check = router.redo = function() {
 		// if the history api is available use the real current url; else use the remembered last used url
-		var url = history.pushState ? location.pathname : currentUsedUrl;
+		var url = history.pushState ? stripRoot(location.pathname) : currentUsedUrl;
 		checkRoutes(url);
 	};
 
 	// parse and wash the url to process
 	function parseUrl(url) {
-		var currentUrl = decodeURI(url);
-		// if the last character is a slash, we just remove it
-		if ('/' === currentUrl.charAt(currentUrl.length - 1)) {
-			currentUrl = currentUrl.substring(0, currentUrl.length - 1);
-		}
-		return currentUrl;
+		return stripSlash(decodeURI(url));
 	}
 
 	function matchRoute(url) {
@@ -205,7 +216,7 @@
 
 	function handleRoutes(e) {
 		if (e && e.originalEvent && e.originalEvent.state !== undefined) {
-			checkRoutes(location.pathname);
+			checkRoutes(stripRoot(location.pathname));
 		}
 	}
 
@@ -215,6 +226,26 @@
 
 	router.off = function() {
 		return $router.off.apply($router, arguments);
+	};
+
+	router.init = function(argName) {
+		var args, argIdx, url, prefix;
+		args = location.search.substr(1).split('&');
+		argIdx = -1;
+		url = null;
+		prefix = argName + '=';
+		args.every(function(arg, idx) {
+			if (prefix === arg.substring(0, prefix.length)) {
+				argIdx = idx;
+				url = arg.substring(prefix.length);
+				return false;
+			}
+			return true;
+		});
+		if (argIdx > -1) {
+			args.splice(argIdx, 1);
+			history.replaceState({}, document.title, root + '/' + url + (args.length ? ('?' + args.join('&')) : ''));
+		}
 	};
 
 	$(window).bind("popstate", handleRoutes);

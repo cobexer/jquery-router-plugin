@@ -1,2 +1,9 @@
 RewriteEngine On
-RewriteRule ^v / [R=307,L]
+RewriteBase /
+
+# Store the current location in an environment variable CWD
+RewriteCond $0#%{REQUEST_URI} ([^#]*)#(.*)\1$
+RewriteRule ^.*$ - [E=CWD:%2]
+
+RewriteRule ^v/(.*)$ %{ENV:CWD}?v=v/$1 [R=307,QSA,L]
+
