@@ -208,8 +208,10 @@ QUnit.test("$.router.chroot", function(assert) {
 	var root = location.pathname;
 	assert.expect(1);
 	$.router.add('/chroot', function() {
+		$.router.reset();
+		$.router.chroot(root);
 		if (hasHistoryAPI) {
-			assert.strictEqual(location.pathname, root + '/v/newroot/chroot', 'root considered when matching routes and updathing the browser visible URL');
+			assert.strictEqual(location.pathname, (root + '/v/newroot/chroot').replace(/[/]+/g, '/'), 'root considered when matching routes and updathing the browser visible URL');
 		}
 		else {
 			assert.ok(true, 'route triggered, but no URL updates supported without the history API');

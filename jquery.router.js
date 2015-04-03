@@ -31,10 +31,11 @@
 	router.currentParameters = {};
 
 	function stripSlash(url) {
-		if ('/' === url.charAt(url.length - 1)) {
-			return url.substring(0, url.length - 1);
+		var u = url.replace(/[/]+/g, '/'); // normalize multiple consecutive slashes to a single slash
+		if ('/' === u.charAt(u.length - 1)) {
+			u = u.substring(0, u.length - 1);
 		}
-		return url;
+		return u;
 	}
 
 	function stripRoot(url) {
@@ -148,11 +149,6 @@
 		checkRoutes(url);
 	};
 
-	// parse and wash the url to process
-	function parseUrl(url) {
-		return stripSlash(decodeURI(url));
-	}
-
 	function matchRoute(url) {
 		var match = false;
 		routeList.every(function(route) {
@@ -196,7 +192,7 @@
 		if (!routesOptimized) {
 			optimizeRoutes();
 		}
-		currentUrl = parseUrl(url);
+		currentUrl = stripSlash(decodeURI(url));
 		match = matchRoute(currentUrl);
 
 		if (match) {
