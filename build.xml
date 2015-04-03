@@ -11,10 +11,10 @@
 		<delete dir="${jscover.dir}" />
 		<antcall target="JSCover-start" />
 		<exec executable="${runner}">
-			<arg value="http://localhost:8081/index.html" />
+			<arg value="http://localhost:8081/test/index.html" />
 		</exec>
 		<exec executable="${runner}">
-			<arg value="http://localhost:8081/index.html?disableHistoryAPI" />
+			<arg value="http://localhost:8081/test/index.html?disableHistoryAPI" />
 		</exec>
 		<antcall target="JSCover-stop" />
 	</target>
