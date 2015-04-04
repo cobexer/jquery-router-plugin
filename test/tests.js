@@ -220,3 +220,23 @@ QUnit.test("$.router.chroot", function(assert) {
 	$.router.chroot(root + '/v/newroot/');
 	$.router.go('/chroot', 'chroot(2)');
 });
+
+QUnit[hasHistoryAPI ? 'test' : 'skip']("$.router.init", function(assert) {
+	var oldSearch = location.search;
+	assert.expect(2);
+	$.router.add('/v/loaded/from/argument', function() {
+		var currentSearch = location.search;
+		history.replaceState({}, '', location.pathname + oldSearch);
+		assert.strictEqual(currentSearch, '', 'url argument used and removed from the effective url');
+	});
+	history.replaceState({}, 'init test', location.pathname + "?what=v/loaded/from/argument");
+	$.router.init('what');
+	$.router.add('/v/loaded/from/argument2', function() {
+		var currentSearch = location.search;
+		history.replaceState({}, '', location.pathname + oldSearch);
+		assert.strictEqual(currentSearch, '?otherArg=b', 'url argument used and removed from the effective url');
+	});
+	history.replaceState({}, 'init test', location.pathname + "?what2=v/loaded/from/argument2&otherArg=b");
+	$.router.init('what2');
+});
+

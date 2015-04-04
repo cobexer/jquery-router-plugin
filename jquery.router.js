@@ -221,24 +221,18 @@
 	};
 
 	router.init = function(argName) {
-		var args, argIdx, url, prefix;
+		var args, prefix;
 		args = location.search.substr(1).split('&');
-		argIdx = -1;
-		url = null;
 		prefix = argName + '=';
 		args.every(function(arg, idx) {
-			if (prefix === arg.substring(0, prefix.length)) {
-				argIdx = idx;
-				url = arg.substring(prefix.length);
-				return false;
+			var matches = prefix === arg.substring(0, prefix.length);
+			if (matches) {
+				args.splice(idx, 1);
+				history.replaceState({}, document.title, stripSlash(root + '/' + arg.substring(prefix.length)) + (args.length ? ('?' + args.join('&')) : ''));
+				router.check();
 			}
-			return true;
+			return !matches;
 		});
-		if (argIdx > -1) {
-			args.splice(argIdx, 1);
-			history.replaceState({}, document.title, root + '/' + url + (args.length ? ('?' + args.join('&')) : ''));
-			router.check();
-		}
 	};
 
 	$(window).bind("popstate", handleRoutes);
