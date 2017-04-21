@@ -1,35 +1,36 @@
 /*
-    Copyright 2011  camilo tapia // 24hr (email : camilo.tapia@gmail.com)
-    Copyright 2015 Christoph Obexer <cobexer@gmail.com>
+	Copyright 2011  camilo tapia // 24hr (email : camilo.tapia@gmail.com)
+	Copyright 2015-2017 Christoph Obexer <cobexer@gmail.com>
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License, version 2, as 
-    published by the Free Software Foundation.
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License, version 2, as
+	published by the Free Software Foundation.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
- */
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+*/
 
 (function($) {
-	var router, routeList, routesOptimized, currentUsedUrl, $router, root;
-
-	router = {};
-	routeList = [];
-	routesOptimized = true;
-	$router = $(router);
+	"use strict";
+	const router = {};
+	const routeList = [];
+	let routesOptimized = true;
+	const $router = $(router);
+	let root;
+	let currentUsedUrl;
 
 	// hold the latest route that was activated
 	router.currentId = "";
 	router.currentParameters = {};
 
 	function stripSlash(url) {
-		var u = url.replace(/[/]+/g, '/'); // normalize multiple consecutive slashes to a single slash
+		let u = url.replace(/[/]+/g, '/'); // normalize multiple consecutive slashes to a single slash
 		if ('/' === u.charAt(u.length - 1)) {
 			u = u.substring(0, u.length - 1);
 		}
@@ -37,7 +38,7 @@
 	}
 
 	function stripRoot(url) {
-		var result = root ? false : url;
+		let result = root ? false : url;
 		if (root && 0 === url.indexOf(root)) {
 			result = url.substring(root.length);
 		}
@@ -48,10 +49,10 @@
 
 	// reset all routes
 	router.reset = function() {
-		routeList = [];
+		routeList.splice(0, routeList.length);
 		routesOptimized = true;
 		router.currentId = "";
-		router.currentParameters = {};
+		router.currentParameters = Object.create(null);
 	};
 
 	function RegexRoute(route) {
@@ -67,11 +68,15 @@
 	};
 
 	function StringRoute(route) {
-		var spec = stripSlash(route), weight = [];
+		let spec = stripSlash(route);
 		// if the routes where created with an absolute url, we have to remove the absolute part anyway, since we can't change that much
 		spec = spec.replace(location.protocol + "//", "").replace(location.hostname, "");
+		let weight = [];
 		this._parts = spec.split('/').map(function(value) {
-			var result = { parameter: false, str: value };
+			let result = {
+				parameter: false,
+				str: value,
+			};
 			if (':' === value.charAt(0)) {
 				result.parameter = true;
 				result.str = value.substring(1);
@@ -86,9 +91,9 @@
 	}
 
 	StringRoute.prototype.match = function(url) {
-		var currentUrlParts, matches = false, data = {};
-		currentUrlParts = url.split("/");
-
+		let matches = false;
+		let data = Object.create(null);
+		const currentUrlParts = url.split("/");
 		// first check so that they have the same amount of elements at least
 		if (this._parts.length === currentUrlParts.length) {
 			matches = this._parts.every(function(part, i) {
@@ -113,66 +118,50 @@
 	};
 
 	router.add = function(route, id, callback) {
-		var routeItem;
 		routesOptimized = false;
-		// if we only get a route and a callback, we switch the arguments
-		if (typeof id === "function") {
-			callback = id;
-			id = null;
-		}
-
+		let routeItem;
 		if (typeof route === "object") {
 			routeItem = new RegexRoute(route);
 		}
 		else {
 			routeItem = new StringRoute(route);
 		}
-
-		routeItem.id = id;
-		routeItem.callback = callback;
+		// if we only get a route and a callback, we switch the arguments
+		if (typeof id === "function") {
+			routeItem.id = null;
+			routeItem.callback = id;
+		}
+		else {
+			routeItem.id = id;
+			routeItem.callback = callback;
+		}
 		routeList.push(routeItem);
 	};
 
-	router.go = function(url, title) {
-		if (history.pushState) {
-			history.pushState({}, title, root + url + location.search);
-		}
-		checkRoutes(url);
-	};
-
-	// do a check without affecting the history
-	router.check = router.redo = function() {
-		// if the history api is available use the real current url; else use the remembered last used url
-		var url = history.pushState ? stripRoot(location.pathname) : currentUsedUrl;
-		checkRoutes(url);
-	};
-
 	function matchRoute(url) {
-		var match = false;
+		let match = false;
 		routeList.every(function(route) {
-			var data = route.match(url);
+			const data = route.match(url);
 			if (data) {
 				match = {
 					route: route,
-					data: data
+					data: data,
 				};
-				// break after first hit
-				return false;
 			}
-			return true;
+			// break after first hit
+			return !data;
 		});
 		return match;
 	}
 
 	function optimizeRoutes() {
 		routeList.sort(function(a, b) {
-			var i, l, wa, wb, ia, ib;
-			wa = a.weight();
-			wb = b.weight();
-			l = Math.max(wa.length, wb.length);
-			for (i = 0; i < l; ++i) {
-				ia = wa.length > i ? wa[i] : -1;
-				ib = wb.length > i ? wb[i] : -1;
+			const wa = a.weight();
+			const wb = b.weight();
+			const l = Math.max(wa.length, wb.length);
+			for (let i = 0; i < l; ++i) {
+				const ia = wa.length > i ? wa[i] : -1;
+				const ib = wb.length > i ? wb[i] : -1;
 				if (ia > ib) {
 					return -1;
 				}
@@ -186,23 +175,37 @@
 	}
 
 	function checkRoutes(url) {
-		var currentUrl, match;
 		if (!routesOptimized) {
 			optimizeRoutes();
 		}
-		currentUrl = stripSlash(decodeURI(url));
-		match = matchRoute(currentUrl);
+		const currentUrl = stripSlash(decodeURI(url));
+		const match = matchRoute(currentUrl);
 
 		if (match) {
 			currentUsedUrl = url;
 			router.currentId = match.route.id;
 			router.currentParameters = match.data;
+			$router.triggerHandler('router:match', [ url, router.currentId, router.currentParameters ]);
 			match.route.callback(router.currentParameters);
 		}
 		else {
-			$router.triggerHandler('route404', [ url ]);
+			$router.triggerHandler('router:404', [ url ]);
 		}
 	}
+
+	router.go = function(url, title) {
+		if (history.pushState) {
+			history.pushState({}, title || '', root + url + location.search);
+		}
+		checkRoutes(url);
+	};
+
+	// do a check without affecting the history
+	router.check = router.redo = function() {
+		// if the history api is available use the real current url; else use the remembered last used url
+		const url = history.pushState ? stripRoot(location.pathname) : currentUsedUrl;
+		checkRoutes(url);
+	};
 
 	function handleRoutes(e) {
 		if (e && e.originalEvent && e.originalEvent.state !== undefined) {
@@ -219,15 +222,14 @@
 	};
 
 	router.init = function(argName) {
-		var args, prefix;
-		args = location.search.substr(1).split('&');
-		prefix = argName + '=';
+		const args = location.search.substr(1).split('&');
+		const prefix = argName + '=';
 		args.every(function(arg, idx) {
-			var matches = prefix === arg.substring(0, prefix.length);
+			const matches = prefix === arg.substring(0, prefix.length);
 			if (matches) {
 				args.splice(idx, 1);
-				history.replaceState({}, document.title, stripSlash(root + '/' + arg.substring(prefix.length)) + (args.length ? ('?' + args.join('&')) : ''));
 				router.check();
+				history.replaceState({}, document.title, root + '/' + stripSlash(arg.substring(prefix.length)) + (args.length ? '?' + args.join('&') : ''));
 			}
 			return !matches;
 		});
@@ -235,4 +237,4 @@
 
 	$(window).bind("popstate", handleRoutes);
 	$.router = router;
-})(jQuery);
+}(jQuery));
