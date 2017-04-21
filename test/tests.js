@@ -95,10 +95,10 @@ QUnit[hasHistoryAPI ? 'test' : 'skip']("routing call initiated through history.b
 QUnit.test("$.router.reset", function(assert) {
 	assert.expect(2);
 	$.router.add('/v/reset', $.noop);
-	$.router.on('route404', function(e, url) {
-		$.router.off('route404');
-		assert.strictEqual(e.type, 'route404', 'expected event type');
-		assert.strictEqual(url, '/v/reset', 'route404 triggered with the expected url');
+	$.router.on('router:404', function(e, url) {
+		$.router.off('router:404');
+		assert.strictEqual(e.type, 'router:404', 'expected event type');
+		assert.strictEqual(url, '/v/reset', 'router:404 triggered with the expected url');
 	});
 	$.router.reset();
 	$.router.go('/v/reset', 'reset');
@@ -159,8 +159,8 @@ QUnit.test("if a $.router.go does not match anything, the current route and para
 		};
 		$.router.go('/v/nowhere');
 	});
-	$.router.on('route404', function() {
-		$.router.off('route404');
+	$.router.on('router:404', function() {
+		$.router.off('router:404');
 		assert.strictEqual(route.id, $.router.currentId, '$.router.reset cleared routes');
 		assert.strictEqual(route.data, $.router.currentParameters, '$.router.reset cleared routes');
 	});

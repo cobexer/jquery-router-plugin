@@ -11,7 +11,7 @@ Setting up your application for use of this plugin is very easy:
 To add route you simply call the add function, providing it with the actual route string, an optional id, and the callback.
 
 $.router.add(*route*, *[id]*, *callback*);
-	
+
 Example:
 
 	// Adds a route for /items/:item and calls the callback when matched
@@ -64,15 +64,15 @@ If you need to remove all routes (which is good when testing) you just call:
 $.router.reset();
 
 ### Events
-In case a route attempt leads to no match the ___route404___ event gets triggered with the url as argument:
+In case a route attempt leads to no match the ___router:404___ event gets triggered with the url as argument:
 to ease event handling $.router.on and $.router.off are aliases to jQuerys on and off functions.
 
 	// register an event handler to respond to route misses.
-	$.router.on('route404', function(e, url) {
+	$.router.on('router:404', function(e, url) {
 		console.log('No route for ' + url);
 	});
 	// unregister all event handlers again.
-	$.router.on('route404');
+	$.router.off('router:404');
 
 ### Handling browser reloads and incoming deep links
 Enabling deep links and fully supporting browser history within your application is hopefully one of the key reasons you selected this library.
@@ -92,7 +92,7 @@ of what $.router is going to handle, to do that call ```$.router.chroot(root)```
 (The MIT License)
 
 	Copyright (c) 2011 Camilo Tapia <camilo.tapia@gmail.com>
-	Copyright (c) 2015 Christoph Obexer <cobexer@gmail.com>
+	Copyright (c) 2015-2017 Christoph Obexer <cobexer@gmail.com>
 
 	Permission is hereby granted, free of charge, to any person obtaining
 	a copy of this software and associated documentation files (the
