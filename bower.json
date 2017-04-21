@@ -1,28 +1,28 @@
 {
-  "name": "jquery.router.js",
-  "description": "Simple routing.",
-  "license": "MIT",
-  "homepage": "https://github.com/cobexer/jquery-router-plugin",
-  "authors": [
-    "Obexer Christoph <cobexer@gmail.com>"
-  ],
-  "moduleType": [
-    "globals"
-  ],
-  "main": "jquery.router.js",
-  "ignore": [
-    "**/*.md",
-    "**/.*",
-    "node_modules",
-    "bower_components",
-    "tools",
-    "test",
-    "build.xml"
-  ],
-  "dependencies": {
-    "jquery": ">=1.7.0"
-  },
-  "devDependencies": {
-    "qunit": "~1.18.0"
-  }
+	"name": "jquery.router.js",
+	"description": "Simple routing.",
+	"license": "MIT",
+	"homepage": "https://github.com/cobexer/jquery-router-plugin",
+	"authors": [
+		"Obexer Christoph <cobexer@gmail.com>"
+	],
+	"moduleType": [
+		"globals"
+	],
+	"main": "jquery.router.js",
+	"ignore": [
+		"**/*.md",
+		"**/.*",
+		"node_modules",
+		"bower_components",
+		"tools",
+		"test",
+		"build.xml"
+	],
+	"dependencies": {
+		"jquery": ">=1.7.0"
+	},
+	"devDependencies": {
+		"qunit": "~1.18.0"
+	}
 }
