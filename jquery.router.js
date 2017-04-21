@@ -23,7 +23,6 @@
 	let routesOptimized = true;
 	const $router = $(router);
 	let root;
-	let currentUsedUrl;
 
 	// hold the latest route that was activated
 	router.currentId = "";
@@ -182,7 +181,6 @@
 		const match = matchRoute(currentUrl);
 
 		if (match) {
-			currentUsedUrl = url;
 			router.currentId = match.route.id;
 			router.currentParameters = match.data;
 			$router.triggerHandler('router:match', [ url, router.currentId, router.currentParameters ]);
@@ -194,17 +192,13 @@
 	}
 
 	router.go = function(url, title) {
-		if (history.pushState) {
-			history.pushState({}, title || '', root + url + location.search);
-		}
+		history.pushState({}, title || '', root + url + location.search);
 		checkRoutes(url);
 	};
 
 	// do a check without affecting the history
 	router.check = router.redo = function() {
-		// if the history api is available use the real current url; else use the remembered last used url
-		const url = history.pushState ? stripRoot(location.pathname) : currentUsedUrl;
-		checkRoutes(url);
+		checkRoutes(stripRoot(location.pathname));
 	};
 
 	function handleRoutes(e) {

@@ -24,8 +24,6 @@ if (/disableHistoryAPI/.test(location.search)) {
 	history.pushState = undefined;
 }
 
-var hasHistoryAPI = !!(history.pushState);
-
 $(window).on('unload', function() {
 	if (window.jscoverage_report) {
 		jscoverage_report();
@@ -71,7 +69,7 @@ QUnit.test("route with id", function(assert) {
 	$.router.go('/v/config', 'Configuration');
 });
 
-QUnit[hasHistoryAPI ? 'test' : 'skip']("routing call initiated through history.back", function(assert) {
+QUnit.test("routing call initiated through history.back", function(assert) {
 	let index = 0;
 	let done = [assert.async(), assert.async(), assert.async()];
 	assert.expect(3);
@@ -121,7 +119,7 @@ QUnit.test("routes must match with all parts (registration order must not affect
 	$.router.go('/v/parts2/phones/android', 'equal length route should match');
 });
 
-QUnit[hasHistoryAPI ? 'test' : 'skip']("$.router.check", function(assert) {
+QUnit.test("$.router.check", function(assert) {
 	assert.expect(1);
 	$.router.add('/v/checked', function() {
 		assert.ok(true, "route for checked url invoked");
@@ -129,19 +127,6 @@ QUnit[hasHistoryAPI ? 'test' : 'skip']("$.router.check", function(assert) {
 	const url = location.pathname.replace(/\/v\/.*$/, '/v/checked') + location.search;
 	history.pushState({}, 'Checked URL', url);
 	$.router.check();
-});
-
-QUnit[hasHistoryAPI ? 'skip' : 'test']("$.router.check (legacy browsers without history.pushState)", function(assert) {
-	var done = [assert.async(), assert.async()], idx = 0;
-	assert.expect(2);
-	$.router.add('/v/checked', function() {
-		assert.ok(true, "route for checked url invoked");
-		done[idx++]();
-		setTimeout(function() {
-			$.router.check();
-		}, 50);
-	});
-	$.router.go('/v/checked', 'Checked URL');
 });
 
 QUnit.test("if a $.router.go does not match anything, the current route and parameters must not be modified", function(assert) {
@@ -162,7 +147,7 @@ QUnit.test("if a $.router.go does not match anything, the current route and para
 	$.router.go('/v/currentRoutePersists', 'Current Route Persists if no match');
 });
 
-QUnit[hasHistoryAPI ? 'test' : 'skip']("location.search should be left intact", function(assert) {
+QUnit.test("location.search should be left intact", function(assert) {
 	const oldSearch = location.search;
 	assert.expect(1);
 	$.router.add('/v/location/search/kept', function() {
@@ -205,18 +190,13 @@ QUnit.test("$.router.chroot", function(assert) {
 	$.router.add('/chroot', function() {
 		$.router.reset();
 		$.router.chroot(root);
-		if (hasHistoryAPI) {
-			assert.strictEqual(location.pathname, (root + '/v/newroot/chroot').replace(/[/]+/g, '/'), 'root considered when matching routes and updathing the browser visible URL');
-		}
-		else {
-			assert.ok(true, 'route triggered, but no URL updates supported without the history API');
-		}
+		assert.strictEqual(location.pathname, (root + '/v/newroot/chroot').replace(/[/]+/g, '/'), 'root considered when matching routes and updathing the browser visible URL');
 	});
 	$.router.chroot(root + '/v/newroot/');
 	$.router.go('/chroot', 'chroot(2)');
 });
 
-QUnit[hasHistoryAPI ? 'test' : 'skip']("$.router.init", function(assert) {
+QUnit.test("$.router.init", function(assert) {
 	$.router.reset();
 	$.router.go('/');
 	const root = location.pathname;
