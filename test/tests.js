@@ -236,4 +236,11 @@ QUnit[hasHistoryAPI ? 'test' : 'skip']("$.router.init", function(assert) {
 	});
 	history.replaceState({}, 'init test', location.pathname + "?what2=v/loaded/from/argument2&otherArg=b");
 	$.router.init('what2');
+	$.router.on('router:404', function() {
+		history.replaceState({}, '', location.pathname + oldSearch);
+		$.router.off('router:404');
+		assert.ok(true, 'empty location.search with nor route for / triggers router:404');
+	});
+	history.replaceState({}, 'init test', root + "?what3=");
+	$.router.init('what3');
 });

@@ -228,11 +228,11 @@
 			const matches = prefix === arg.substring(0, prefix.length);
 			if (matches) {
 				args.splice(idx, 1);
-				router.check();
 				history.replaceState({}, document.title, root + '/' + stripSlash(arg.substring(prefix.length)) + (args.length ? '?' + args.join('&') : ''));
 			}
 			return !matches;
 		});
+		router.check();
 	};
 
 	$(window).bind("popstate", handleRoutes);
