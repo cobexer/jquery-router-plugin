@@ -1,0 +1,23 @@
+{
+	"bitwise": true,
+	"curly": true,
+	"eqeqeq": true,
+	"forin": true,
+	"freeze": true,
+	"futurehostile": true,
+	"latedef": true,
+	"maxerr": 5000,
+	"nocomma": true,
+	"nonbsp": true,
+	"nonew": true,
+	"notypeof": true,
+	"singleGroups": true,
+	"strict": "implied",
+	"undef": true,
+	"unused": true,
+	"varstmt": true,
+	"esversion": 6,
+	"-W034": true,
+	"browser": true,
+	"jquery": true
+}
