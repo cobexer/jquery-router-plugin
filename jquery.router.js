@@ -18,15 +18,15 @@
 
 (function($) {
 	"use strict";
-	const router = {};
+	const router = Object.create(null);
 	const routeList = [];
-	let routesOptimized = true;
 	const $router = $(router);
+	let routesOptimized = true;
 	let root;
 
 	// hold the latest route that was activated
 	router.currentId = "";
-	router.currentParameters = {};
+	router.currentParameters = Object.create(null);
 
 	function stripSlash(url) {
 		let u = url.replace(/[/]+/g, '/'); // normalize multiple consecutive slashes to a single slash
@@ -192,7 +192,7 @@
 	}
 
 	router.go = function(url, title) {
-		history.pushState({}, title || '', root + url + location.search);
+		history.pushState(Object.create(null), title || '', root + url + location.search);
 		checkRoutes(url);
 	};
 
@@ -222,7 +222,7 @@
 			const matches = prefix === arg.substring(0, prefix.length);
 			if (matches) {
 				args.splice(idx, 1);
-				history.replaceState({}, document.title, root + '/' + stripSlash(arg.substring(prefix.length)) + (args.length ? '?' + args.join('&') : ''));
+				history.replaceState(Object.create(null), document.title, root + '/' + stripSlash(arg.substring(prefix.length)) + (args.length ? '?' + args.join('&') : ''));
 			}
 			return !matches;
 		});
