@@ -201,7 +201,7 @@ QUnit.test("$.router.init", function(assert) {
 	$.router.go('/');
 	const root = location.pathname;
 	const oldSearch = location.search;
-	assert.expect(3);
+	assert.expect(5);
 	$.router.add('/v/loaded/from/argument', function() {
 		const currentSearch = location.search;
 		history.replaceState({}, '', location.pathname + oldSearch);
@@ -223,4 +223,17 @@ QUnit.test("$.router.init", function(assert) {
 	});
 	history.replaceState({}, 'init test', root + "?what3=");
 	$.router.init('what3');
+	$.router.reset();
+	history.replaceState({}, 'init test', location.pathname + "?what4=/v/loaded/from/argument4&otherArg=b");
+	const basePath = location.pathname;
+	$.router.add(/.*/, function() {
+		const currentSearch = location.search;
+		const currentPath = location.pathname;
+		history.replaceState({}, '', location.pathname + oldSearch);
+		assert.strictEqual(currentSearch, '?otherArg=b', 'url argument used and removed from the effective url');
+		let path = basePath + '/v/loaded/from/argument4';
+		path = path.replace(/\/[\/]+/, '/');
+		assert.strictEqual(currentPath, path, 'path with no duplicated slashes');
+	});
+	$.router.init('what4');
 });

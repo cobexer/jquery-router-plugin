@@ -222,7 +222,7 @@
 			const matches = prefix === arg.substring(0, prefix.length);
 			if (matches) {
 				args.splice(idx, 1);
-				history.replaceState(Object.create(null), document.title, root + '/' + stripSlash(arg.substring(prefix.length)) + (args.length ? '?' + args.join('&') : ''));
+				history.replaceState(Object.create(null), document.title, stripSlash(root + '/' + arg.substring(prefix.length)) + (args.length ? '?' + args.join('&') : ''));
 			}
 			return !matches;
 		});
