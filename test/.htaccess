@@ -5,5 +5,4 @@ RewriteBase /
 RewriteCond $0#%{REQUEST_URI} ([^#]*)#(.*)\1$
 RewriteRule ^.*$ - [E=CWD:%2]
 
-RewriteRule ^v/(.*)$ %{ENV:CWD}?v=v/$1 [R=307,QSA,L]
-
+RewriteRule ^(v/.*)$ %{ENV:CWD}?v=$1 [R=307,B,QSA,L]
