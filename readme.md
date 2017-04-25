@@ -80,7 +80,7 @@ Both features require server side support, your server needs to be able to respo
 that your application can understand and turn into the correct content on the client side.
 Suppose you have a ToDo application and the URL looks like this: https://example.org/my-todos/ (this is where your application, jQuery, and this plugin reside).
 A user clicks on an a link on an external site like: https://example.org/my-todos/v/list/kNKHVXol/all, and to enable the deep linking your server redirects that to:
-https://example.org/my-todos/?v=/v/list/kNKHVXol/all to handle this URL with jquery.router.js call ```$.router.init('v')``` v being the name of the URL argument
+https://example.org/my-todos/?v=%2fv%2flist%2fkNKHVXol%2fall to handle this URL with jquery.router.js call ```$.router.init('v')``` v being the name of the URL argument
 that contains the URL to route to. The result will look the same in the client after your application has initialized, but all your assets can be loaded using relative
 URLs which is a nice bonus for applications that are also installed in an on-premises context where absolute control over URL setup is not possible.
 If you have no idea how to get your server to send redirects like that and you also use Apache HTTPD check out the .htaccess file inside the test directory

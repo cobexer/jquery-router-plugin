@@ -207,14 +207,14 @@ QUnit.test("$.router.init", function(assert) {
 		history.replaceState({}, '', location.pathname + oldSearch);
 		assert.strictEqual(currentSearch, '', 'url argument used and removed from the effective url');
 	});
-	history.replaceState({}, 'init test', location.pathname + "?what=v/loaded/from/argument");
+	history.replaceState({}, 'init test', location.pathname + "?what=v%2floaded%2ffrom%2fargument");
 	$.router.init('what');
 	$.router.add('/v/loaded/from/argument2', function() {
 		const currentSearch = location.search;
 		history.replaceState({}, '', location.pathname + oldSearch);
 		assert.strictEqual(currentSearch, '?otherArg=b', 'url argument used and removed from the effective url');
 	});
-	history.replaceState({}, 'init test', location.pathname + "?what2=v/loaded/from/argument2&otherArg=b");
+	history.replaceState({}, 'init test', location.pathname + "?what2=v%2floaded%2ffrom%2fargument2&otherArg=b");
 	$.router.init('what2');
 	$.router.on('router:404', function() {
 		history.replaceState({}, '', location.pathname + oldSearch);
@@ -224,7 +224,7 @@ QUnit.test("$.router.init", function(assert) {
 	history.replaceState({}, 'init test', root + "?what3=");
 	$.router.init('what3');
 	$.router.reset();
-	history.replaceState({}, 'init test', location.pathname + "?what4=/v/loaded/from/argument4&otherArg=b");
+	history.replaceState({}, 'init test', location.pathname + "?what4=" + encodeURIComponent("/v/loaded/from/argument4") + "&otherArg=b");
 	const basePath = location.pathname;
 	$.router.add(/.*/, function() {
 		const currentSearch = location.search;
